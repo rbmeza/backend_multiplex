@@ -1,45 +1,46 @@
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
-from markupsafe import escape
+from dotenv import load_dotenv
+import os
 import openai
 
+load_dotenv()
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-openai.api_key = "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"
+openai.api_key = os.environ.get("OPENAI_KEY")
 
-@app.route("/<name>")
-def hello_world(name):
-    return f"<p>Hello, {escape(name)}!</p>"
 
 @app.route("/recipe", methods=["POST"])
 @cross_origin()
 def recepie():
     ingredients = request.get_json()
-    list_ingredients = ""
-    
+    list_ingredients = " "
     for ingredient in ingredients:
         list_ingredients += ingredient + ", "
 
-    prompt = """Eres un chef profesional. Tengo una página web donde un usuario escoge los ingredientes que quiere incluir en una receta. Necesito que escribas una receta con los ingredientes listados al final, usando la siguiente estructura: 
-                [Nombre de la receta]
-                [Tiempo de cocción]
-                [Porciones]
-                [Lista de ingredientes con sus respectivas cantidades]
-                [Pasos a seguir]
-                [Aporte calórico]
-                Entrega el título de la receta entre tags de html <h2>, la lista de ingredientes entre tags <ul>, cada uno de los ingredientes y sus cantidades entre tags <li>, la lista de pasos a seguir entre tags <ol>, cada paso entre tags <li> y las porciones y el aporte calórico entre tags <p>
+    prompt = """Eres un chef profesional. Necesito que completes la receta usando los ingredientes listados 
+            al final, puedes usar ingredientes extra, pero indicalos en la receta. Usa la siguiente estructura: 
+                Nombre:
+                Tiempo de cocción:
+                Porciones:
+                Ingredientes:
+                Pasos:
+                Aporte calórico:
                 Ingredientes:"""
     output = openai.Completion.create(
-        engine="davinci",
-        prompt=prompt,
-        temperature=0.3,
-        max_tokens=60,
+        engine="text-davinci-003",
+        prompt=prompt + list_ingredients,
+        temperature=0,
+        max_tokens=700,
+        top_p=1,
+        frequency_penalty=0.5,
+        presence_penalty=0,
     )
 
     json_response = {
-        "recipe": output["choices"][0]["text"],
+        "recipe": output["choices"][0]["text"]
     }
 
     return json_response
