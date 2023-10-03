@@ -21,7 +21,7 @@ def recepie():
         list_ingredients += ingredient + ", "
 
     prompt = """Eres un chef profesional. Necesito que completes la receta usando los ingredientes listados 
-            al final, puedes usar ingredientes extra, pero indicalos en la receta. Usa la siguiente estructura: 
+            al final, no puedes usar ingredientes extra. Usa la siguiente estructura: 
                 Nombre:
                 Tiempo de cocción:
                 Porciones:
