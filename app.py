@@ -16,22 +16,25 @@ openai.api_key = os.environ.get("OPENAI_KEY")
 @cross_origin()
 def recepie():
     ingredients = request.get_json()
-    list_ingredients = " "
+    list_ingredients = "Ingredientes a utilizar: "
     for ingredient in ingredients:
-        list_ingredients += ingredient + ", "
+        if ingredient != ingredients[-1]:
+            list_ingredients += ingredient + ", "
+        else:
+            list_ingredients += ingredient + "."
 
-    prompt = """Eres un chef profesional. Necesito que completes la receta usando los ingredientes listados 
-            al final, no puedes usar ingredientes extra. Usa la siguiente estructura: 
+    prompt = """Eres un chef profesional. Necesito que completes la receta usando solo los ingredientes listados 
+                al principio. Usa la siguiente estructura: 
                 Nombre:
                 Tiempo de cocción:
                 Porciones:
                 Ingredientes:
                 Pasos:
                 Aporte calórico:
-                Ingredientes:"""
+                """
     output = openai.Completion.create(
         engine="text-davinci-003",
-        prompt=prompt + list_ingredients,
+        prompt=list_ingredients + prompt,
         temperature=0,
         max_tokens=700,
         top_p=1,
